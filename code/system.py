@@ -248,7 +248,7 @@ def main():
     mean = []
     q_ini = []
     threshold = 0.3
-    for num_nodes in range(9, 100, 10):
+    for num_nodes in range(9, 100, 1):
         graph_temp = generate_graph(num_nodes,threshold)
         threshold=threshold - (0.001)
         print("threshold", threshold)
@@ -294,17 +294,17 @@ def main():
         print("No of iterations", no_iterations)
         print("Mean", np.mean(no_iterations))
         mean.append(np.mean(no_iterations))
-        if num_nodes == 9:
-            objects = ('q learning', 'q learning after removing node')
-            y_pos = np.arange(len(objects))
-            performance = [q_ini_iteration,np.mean(no_iterations)]
+        # if num_nodes == 9:
+        #     objects = ('q learning', 'q learning after removing node')
+        #     y_pos = np.arange(len(objects))
+        #     performance = [q_ini_iteration,np.mean(no_iterations)]
             
-            plt.xticks(y_pos, objects)
-            plt.ylabel('No of iterations')
-            plt.title('Base Algorithm')
-            plt.bar(y_pos, performance, align='center', alpha=0.5)
-            plt.savefig('../plots/base.jpg')
-            plt.close()
+        #     plt.xticks(y_pos, objects)
+        #     plt.ylabel('No of iterations')
+        #     plt.title('Base Algorithm')
+        #     plt.bar(y_pos, performance, align='center', alpha=0.5)
+        #     plt.savefig('../plots/base.jpg')
+        #     plt.close()
             
     # plt.title('Trend in iterations')
     # plt.ylabel('Number of iterations')
@@ -318,13 +318,13 @@ def main():
     plt.ylabel('Mean number of iterations')
     plt.xlabel('Number of nodes in graph')
     plt.plot(mean, "-o")
-    plt.savefig('../plots/trends_system.jpg')
+    plt.savefig('../plots/trends_system1.jpg')
     plt.show()
     plt.close()
     print("Mean of graphs", mean)
        
     print("Mean of mean of graphs", sum(mean)/len(mean))
-    pickle.dump(mean, open('../mean_system.p', 'wb'))
+    pickle.dump(mean, open('../mean_system1.p', 'wb'))
 
     # print("graph3_15")
     # initialize('1','9','graph3_15')

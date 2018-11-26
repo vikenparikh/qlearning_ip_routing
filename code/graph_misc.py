@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
 import pickle
+import numpy as np
 
-mean_sys = pickle.load(open('../mean_system.p','rb'))
-mean_agt = pickle.load(open('../mean_agent.p','rb'))
+mean_sys = pickle.load(open('../mean_system1.p','rb'))
+mean_agt = pickle.load(open('../mean_agent1.p','rb'))
 
 objects = ('q learning', 'q learning agent')
 y_pos = np.arange(len(objects))

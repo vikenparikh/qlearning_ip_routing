@@ -173,7 +173,7 @@ def qlearning(n):
         while node != des_node:
             
             if Cnt[node] % n/5 == 0:
-                if T[node] - 200 > 0:
+                if T[node] - 1000 > 0:
                     T[node] -= 200
                 elif T[node] - 190 > 0:
                     T[node] -= 190
@@ -266,7 +266,7 @@ def main():
     mean = []
     q_ini = []
     threshold = 0.3
-    for num_nodes in range(9, 100, 10):
+    for num_nodes in range(9, 100, 1):
         graph_temp = generate_graph(num_nodes,threshold)
         threshold=threshold - (0.001)
         print("threshold", threshold)
@@ -327,12 +327,12 @@ def main():
     plt.ylabel('Mean number of iterations')
     plt.xlabel('Number of nodes in graph')
     plt.plot(mean, "-o")
-    plt.savefig('../plots/trends_agent.jpg')
+    plt.savefig('../plots/trends_agent1.jpg')
     plt.show()
     plt.close()
     print("Mean of graphs", mean)
     print("Mean of mean of graphs", sum(mean)/len(mean))
-    pickle.dump(mean, open('../mean_agent.p', 'wb'))
+    pickle.dump(mean, open('../mean_agent1.p', 'wb'))
     # print("graph3_15")
     # initialize('1','9','graph3_15')
     # cnt.append(qlearning())
