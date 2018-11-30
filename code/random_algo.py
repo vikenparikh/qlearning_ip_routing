@@ -192,7 +192,7 @@ def main():
     mean = []
     q_ini = []
     threshold = 0.3
-    for num_nodes in range(9, 14, 1):
+    for num_nodes in range(9, 50, 1):
         if num_nodes % 10 == 0:
             print("Iteration " + str(num_nodes))
         nodes.append(num_nodes)
@@ -256,7 +256,7 @@ def main():
     plt.ylabel('Number of iterations')
     plt.xlabel('Number of nodes in graph')
     plt.plot(nodes, q_ini, "-o")
-    plt.savefig('../plots/q_n_graphs_3.jpg')
+    plt.savefig('../plots/trends_random.jpg')
     plt.show()
     plt.close()
     
@@ -265,13 +265,13 @@ def main():
     plt.ylabel('Mean number of iterations')
     plt.xlabel('Number of nodes in graph')
     plt.plot(nodes, mean, "-o")
-    plt.savefig('../plots/trends_random.jpg')
+    plt.savefig('../plots/trends_random_rn.jpg')
     plt.show()
     plt.close()
     # print("Mean of graphs", mean)
        
     # print("Mean of mean of graphs", sum(mean)/len(mean))
-    # pickle.dump(mean, open('../mean_system1.p', 'wb'))
+    # pickle.dump(mean, open('../data/mean_random.p', 'wb'))
 
 if __name__ == "__main__":
     main()

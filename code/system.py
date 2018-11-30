@@ -220,13 +220,13 @@ def main():
     mean = []
     q_ini = []
     threshold = 0.3
-    for num_nodes in range(9, 14, 1):
+    for num_nodes in range(9, 100, 1):
         if num_nodes % 10 == 0:
             print("Iteration " + str(num_nodes))
         nodes.append(num_nodes)
         graph_temp = generate_graph(num_nodes,threshold)
         threshold=threshold - (0.001)
-        print("threshold", threshold)
+        # print("threshold", threshold)
 
         a_temp = np.random.randint(0, num_nodes-1)
         b_temp = np.random.randint(0, num_nodes-1)
@@ -237,17 +237,17 @@ def main():
         a = str(a_temp)
         b = str(b_temp)
 
-        print("Str node", a)
-        print("Des node", b)
+        # print("Str node", a)
+        # print("Des node", b)
         no_iterations = []
-        print("graph_temp")
+        # print("graph_temp")
         initialize(a,b,'graph_temp')
         q_ini_iteration = qlearning(num_nodes) # alpha (learning rate)
         q_ini.append(q_ini_iteration)
         # itr_lr.append(q_ini_iteration)
-        print("Q table",qtables)
-        print("T",T)
-        print("Path:",fetch_path())
+        # print("Q table",qtables)
+        # print("T",T)
+        # print("Path:",fetch_path())
 
         original_qtable = dict()
         original_qtable = copy.deepcopy(qtables)
@@ -257,16 +257,16 @@ def main():
             qtables = copy.deepcopy(original_qtable)
             from_edge = str(i['from'])
             to_edge = str(i['to'])
-            print("Path:",fetch_path())
-            print("Removing edges:",from_edge,to_edge)
+            # print("Path:",fetch_path())
+            # print("Removing edges:",from_edge,to_edge)
             graph_temp2.remove_edge(int(from_edge), int(to_edge))
             if not nx.has_path(graph_temp2, a_temp, b_temp):
                 continue
             no_iterations.append(remove_nodes(from_edge,to_edge, num_nodes))
-            print("Path after removing:", fetch_path())
+            # print("Path after removing:", fetch_path())
 
-        print("No of iterations", no_iterations)
-        print("Mean", np.mean(no_iterations))
+        # print("No of iterations", no_iterations)
+        # print("Mean", np.mean(no_iterations))
         mean.append(np.mean(no_iterations))
         # plot the graph for base system (9 nodes network)
         # if num_nodes == 9:
@@ -286,7 +286,7 @@ def main():
     plt.ylabel('Number of iterations')
     plt.xlabel('Number of nodes in graph')
     plt.plot(nodes, q_ini, "-o")
-    plt.savefig('../plots/q_n_graphs_3.jpg')
+    plt.savefig('../plots/trends_q.jpg')
     plt.show()
     plt.close()
 
@@ -304,13 +304,13 @@ def main():
     plt.ylabel('Mean number of iterations')
     plt.xlabel('Number of nodes in graph')
     plt.plot(nodes, mean, "-o")
-    plt.savefig('../plots/trends_system2.jpg')
+    plt.savefig('../plots/trends_q_rn.jpg')
     plt.show()
     plt.close()
     # print("Mean of graphs", mean)
        
     # print("Mean of mean of graphs", sum(mean)/len(mean))
-    # pickle.dump(mean, open('../mean_system1.p', 'wb'))
+    pickle.dump(mean, open('../data/mean_system.p', 'wb'))
 
 if __name__ == "__main__":
     main()
