@@ -74,8 +74,6 @@ def initialize(s,d,file_name):
     # print(qtables)
     # print()
 
-    
-
     # initial Parameters
     # print("Initial Parameters")
     # print("Learning rate")
@@ -114,29 +112,19 @@ def qlearning():
     global qtables
     # count - no of iterations and t = current t value
     count = 0
-    # random starting node
-    # nodes = [i for i in qtables.keys()]
     # iterating till convergence
     # number of time it converges
     cnt_converge = 0
     # set converge flag to 0
     converge_flag = 0
-    # for i in range(200):
     while converge_flag != 1 and count < 1000:
-        # print("t",t)
-        # print(count)
         # store the old qtable
         old_qtable = dict()
         old_qtable = copy.deepcopy(qtables)
-        # print("old_qtable",old_qtable)
-        # ri = random.randint(0,len(nodes)-1)
-        # node = nodes[ri]
         # start from the source node
         node = src_node
-        # print("New episode. node:",node)
         while node != des_node:
             next_node = select_action(node)
-            # print("next node:", next_node)
             q_old = qtables[node][next_node]
             q = []
             for i in qtables[next_node].items():
@@ -145,15 +133,9 @@ def qlearning():
             r = -weights[node][next_node]
             if next_node == des_node:
                 r = 10
-            
-            # print("q", q)
-            # print("r, gamma, alpha, qtables[node][next_node]",r, gamma, alpha, qtables[node][next_node])
             w = alpha * (r + (gamma * max(q))-qtables[node][next_node])
             q_new = q_old + w
             qtables[node][next_node] = q_new
-
-            # print("q_new q_old w",q_new,q_old,w)
-            # print(qtables)
             node = next_node
         count += 1
         # check if converges
@@ -164,17 +146,12 @@ def qlearning():
             for v in qtables[u].keys():
                 if math.fabs(old_qtable[u][v] - qtables[u][v]) < 0.000000000005:
                     elements_convergence += 1
-    
-        # print("elements_convergence",elements_convergence)
-        # print("q_tbl_cnt",q_tbl_cnt)
+
         if elements_convergence == q_tbl_cnt:
-            cnt_converge += 1
-        
+            cnt_converge += 1 
         if cnt_converge > 4:
             converge_flag = 1
-        # print("old_qtable_2",old_qtable)
-        # print("current qtable", qtables)
-        # print("cnt_converge",cnt_converge)
+
     return count
 
 
@@ -182,11 +159,12 @@ def select_action(node):
     global qtables
     nodes = list(qtables[node].keys())
     mx_t = nodes[random.randint(0,len(nodes)-1)]
-    # print("max",mx_t)
+
     return mx_t
 
 def remove_nodes(a,b):
     qtables[a][b] = -100
+
     return qlearning()
 
 
@@ -210,14 +188,17 @@ def fetch_path():
 
 def main():
     global qtables
-    # no_nodes = [10,15,20]
+    nodes = []
     mean = []
     q_ini = []
     threshold = 0.3
-    for num_nodes in range(9, 50, 10):
+    for num_nodes in range(9, 14, 1):
+        if num_nodes % 10 == 0:
+            print("Iteration " + str(num_nodes))
+        nodes.append(num_nodes)
         graph_temp = generate_graph(num_nodes,threshold)
         threshold=threshold - (0.001)
-        print("threshold", threshold)
+        # print("threshold", threshold)
 
         a_temp = np.random.randint(0, num_nodes-1)
         b_temp = np.random.randint(0, num_nodes-1)
@@ -228,15 +209,15 @@ def main():
         a = str(a_temp)
         b = str(b_temp)
 
-        print("Str node", a)
-        print("Des node", b)
+        # print("Str node", a)
+        # print("Des node", b)
         no_iterations = []
-        print("graph_temp")
+        # print("graph_temp")
         initialize(a,b,'graph_temp')
         q_ini_iteration = qlearning()
         q_ini.append(q_ini_iteration)
-        print("Q table",qtables)
-        print("Path:",fetch_path())
+        # print("Q table",qtables)
+        # print("Path:",fetch_path())
 
         original_qtable = dict()
         original_qtable = copy.deepcopy(qtables)
@@ -246,21 +227,18 @@ def main():
             qtables = copy.deepcopy(original_qtable)
             from_edge = str(i['from'])
             to_edge = str(i['to'])
-            print("Path:",fetch_path())
-            print("Removing edges:",from_edge,to_edge)
+            # print("Path:",fetch_path())
+            # print("Removing edges:",from_edge,to_edge)
             graph_temp2.remove_edge(int(from_edge), int(to_edge))
             if not nx.has_path(graph_temp2, a_temp, b_temp):
                 continue
             no_iterations.append(remove_nodes(from_edge,to_edge))
-            # print("Final Qtable")
-            # print(qtables)
-            print("Path after removing:", fetch_path())
+            # print("Path after removing:", fetch_path())
 
-        print("No of iterations", no_iterations)
-        print("Mean", np.mean(no_iterations))
+        # print("No of iterations", no_iterations)
+        # print("Mean", np.mean(no_iterations))
         mean.append(np.mean(no_iterations))
-        
-
+        # plot the graph for base system - Random approach (9 nodes network)
         # if num_nodes == 9:
         #     objects = ('q learning', 'q learning after removing node')
         #     y_pos = np.arange(len(objects))
@@ -272,57 +250,28 @@ def main():
         #     plt.bar(y_pos, performance, align='center', alpha=0.5)
         #     plt.savefig('../plots/base.jpg')
         #     plt.close()
-            
-    # plt.title('Trend in iterations')
-    # plt.ylabel('Number of iterations')
-    # plt.xlabel('Number of nodes in graph')
-    # plt.plot(q_ini, "-o")
-    # plt.savefig('../plots/q_n_graphs_3.jpg')
-    # plt.show()
-    # plt.close()
 
-    # plt.title('Trend in iterations with change in learning rate')
-    # plt.ylabel('Mean number of iterations')
-    # plt.xlabel('Number of nodes in graph')
-    # plt.plot(itr_lr, "-o")
-    # plt.savefig('../plots/trends_sys_lr.jpg')
-    # plt.show()
-    # plt.close()
+    # plotting the trends in number of iterations wrt number of nodes in graph 
+    plt.title('Trend in iterations')
+    plt.ylabel('Number of iterations')
+    plt.xlabel('Number of nodes in graph')
+    plt.plot(nodes, q_ini, "-o")
+    plt.savefig('../plots/q_n_graphs_3.jpg')
+    plt.show()
+    plt.close()
     
+    # plotting the trends in number of iterations wrt number of nodes in graph (after removing node)
     plt.title('Trend in iterations with random (after removing node)')
     plt.ylabel('Mean number of iterations')
     plt.xlabel('Number of nodes in graph')
-    plt.plot(mean, "-o")
+    plt.plot(nodes, mean, "-o")
     plt.savefig('../plots/trends_random.jpg')
     plt.show()
     plt.close()
-    print("Mean of graphs", mean)
+    # print("Mean of graphs", mean)
        
     # print("Mean of mean of graphs", sum(mean)/len(mean))
     # pickle.dump(mean, open('../mean_system1.p', 'wb'))
-
-    # print("graph3_15")
-    # initialize('1','9','graph3_15')
-    # cnt.append(qlearning())
-    # rem_cnt.append(remove_nodes('3','9'))
-    # # print("Final Qtable")
-    # # print(qtables)
-    # print()
-
-    # print("graph4_20")
-    # initialize('2','14','graph4_20')
-    # cnt.append(qlearning())
-    # # print("Final Qtable")
-    # # print(qtables)
-    # rem_cnt.append(remove_nodes('1','7'))
-    # #print("Final Qtable")
-    # #print(qtables)
-
-    # print(cnt)
-    # print(rem_cnt)
-    # plt.plot(no_nodes,cnt,'ro-')
-    # plt.plot(no_nodes,rem_cnt,'bo-')
-    # plt.show()
 
 if __name__ == "__main__":
     main()

@@ -12,7 +12,7 @@ src_node = ''
 des_node = ''
 
 # parameters
-# alpha = 0.01 # learning rate
+alpha = 0.1 # learning rate
 drate = 1.0 # reward discount rate
 err = 0.1 # error of approaching extremities
 gamma = 0.9 # discount rate
@@ -122,7 +122,6 @@ def initialize(s,d,file_name):
 # function that returns the best action based on softmax function (Boltzmann)
 def softmax(node, T):
     global qtables
-    # print(qtables)
     # list of probabilities
     p = []    
     # calculate probability for each action
@@ -132,46 +131,32 @@ def softmax(node, T):
         den += math.exp(i[1] / T[node])
     # calculating the probability 
     for i in qtables[node].items():
-        # print(i[1])
         t_p =  (math.exp(i[1] / T[node]) ) / den
         p.append((i[0],t_p))
-    # print(p)
-    # print(max(p)[0])
     # return best action based on probabilities
     mx = max(p, key=lambda item: item[1])
     return mx[0]
 
 
 # qlearning function
-def qlearning(alpha, n):
+def qlearning(n): # alpha (learning rate)
     global qtables, Cnt, T
     # count - no of iterations
     count_i = 0
-    # random starting node
-    # nodes = [i for i in qtables.keys()]
     # iterating till convergence
     # number of time it converges
     cnt_converge = 0
     # set converge flag to 0
     converge_flag = 0
-    # for i in range(200):
     while converge_flag != 1 and count_i < 1000:
-        # print("t",t)
-        # print(count_i)
         # store the old qtable
         old_qtable = dict()
         old_qtable = copy.deepcopy(qtables)
-        # print("old_qtable",old_qtable)
-        
         # start from the source node
         node = src_node
         Cnt[node] += 1
-        
-        # ri = random.randint(0,len(nodes)-1)
-        # node = nodes[ri]
-        # print("New episode. node:",node)
         while node != des_node:
-            
+            # temperature decrement for each node
             if Cnt[node] % n/5 == 0:
                 if T[node] - 1000 > 0:
                     T[node] -= 200
@@ -180,7 +165,6 @@ def qlearning(alpha, n):
 
             next_node = select_action(node,T)
             Cnt[next_node] += 1
-            # print("next node:", next_node)
             q_old = qtables[node][next_node]
             q = []
             for i in qtables[next_node].items():
@@ -189,15 +173,9 @@ def qlearning(alpha, n):
             r = -weights[node][next_node]
             if next_node == des_node:
                 r = 10
-            
-            # print("q", q)
-            # print("r, gamma, alpha, qtables[node][next_node]",r, gamma, alpha, qtables[node][next_node])
             w = alpha * (r + (gamma * max(q))-qtables[node][next_node])
             q_new = q_old + w
             qtables[node][next_node] = q_new
-
-            # print("q_new q_old w",q_new,q_old,w)
-            # print(qtables)
             node = next_node
         count_i += 1
         # check if converges
@@ -209,26 +187,19 @@ def qlearning(alpha, n):
                 if math.fabs(old_qtable[u][v] - qtables[u][v]) < 0.000000000005:
                     elements_convergence += 1
     
-        # print("elements_convergence",elements_convergence)
-        # print("q_tbl_cnt",q_tbl_cnt)
         if elements_convergence == q_tbl_cnt:
             cnt_converge += 1
         
         if cnt_converge > 4:
             converge_flag = 1
-        # print("old_qtable_2",old_qtable)
-        # print("current qtable", qtables)
-        # print("cnt_converge",cnt_converge)
+
     return count_i
 
 
 def select_action(node, T):
     global qtables
-    # print("select_action-",qtables[node].items())
-    # print(qtables)
-    # mx_t = max(qtables[node].items(), key=lambda item: item[1])
     mx_t = softmax(node, T)
-    # print("max",mx_t)
+
     return mx_t
 
 def remove_nodes(a,b,n, alpha):
@@ -239,7 +210,7 @@ def remove_nodes(a,b,n, alpha):
     for i in graph['nodes']:
         T[str(i['id'])] = Tmax
     
-    return qlearning(alpha, n)
+    return qlearning(n) # alpha (learning rate)
 
 def fetch_path():
     path = []
@@ -262,111 +233,96 @@ def fetch_path():
 
 def main():
     global qtables
-    # no_nodes = [10,15,20]
-    itr_lr = []
-    for k in range(1,9):
-        alpha = k * 0.1
-        mean = []
-        q_ini = []
-        threshold = 0.3
-        for num_nodes in range(9, 10, 1):
-            graph_temp = generate_graph(num_nodes,threshold)
-            threshold=threshold - (0.001)
-            print("threshold", threshold)
+    # learning rate
+    # itr_lr = []
+    # for k in range(1,9):
+    #     alpha = k * 0.1
+    nodes = []
+    mean = []
+    q_ini = []
+    threshold = 0.3
+    for num_nodes in range(9, 20, 1):
+        if num_nodes % 10 == 0:
+            print("Iteration " + str(num_nodes))
+        nodes.append(num_nodes)
+        graph_temp = generate_graph(num_nodes,threshold)
+        threshold=threshold - (0.001)
+        # print("threshold", threshold)
 
+        a_temp = np.random.randint(0, num_nodes-1)
+        b_temp = np.random.randint(0, num_nodes-1)
+        while not (nx.has_path(graph_temp, a_temp, b_temp) and a_temp != b_temp):
             a_temp = np.random.randint(0, num_nodes-1)
             b_temp = np.random.randint(0, num_nodes-1)
-            while not (nx.has_path(graph_temp, a_temp, b_temp) and a_temp != b_temp):
-                a_temp = np.random.randint(0, num_nodes-1)
-                b_temp = np.random.randint(0, num_nodes-1)
-            
-            a = str(a_temp)
-            b = str(b_temp)
+        
+        a = str(a_temp)
+        b = str(b_temp)
 
-            print("Str node", a)
-            print("Des node", b)
-            no_iterations = []
-            print("graph_temp")
-            initialize(a,b,'graph_temp')
-            q_ini_iteration = qlearning(alpha, num_nodes)
-            q_ini.append(q_ini_iteration)
-            itr_lr.append(q_ini_iteration)
-            print("Q table",qtables)
-            print("T",T)
-            print("Cnt",Cnt)
-            print("Path:",fetch_path())
+        # print("Str node", a)
+        # print("Des node", b)
+        no_iterations = []
+        # print("graph_temp")
+        initialize(a,b,'graph_temp')
+        q_ini_iteration = qlearning(num_nodes) # alpha (learning rate)
+        q_ini.append(q_ini_iteration)
+        # itr_lr.append(q_ini_iteration)
+        # print("Q table",qtables)
+        # print("T",T)
+        # print("Cnt",Cnt)
+        # print("Path:",fetch_path())
 
-            original_qtable = dict()
-            original_qtable = copy.deepcopy(qtables)
+        original_qtable = dict()
+        original_qtable = copy.deepcopy(qtables)
 
-            # for i in edges:
-            #     graph_temp2 = copy.deepcopy(graph_temp)
-            #     qtables = copy.deepcopy(original_qtable)
-            #     from_edge = str(i['from'])
-            #     to_edge = str(i['to'])
-            #     print("Path:",fetch_path())
-            #     print("Removing edges:",from_edge,to_edge)
-            #     graph_temp2.remove_edge(int(from_edge), int(to_edge))
-            #     if not nx.has_path(graph_temp2, a_temp, b_temp):
-            #         continue
-            #     no_iterations.append(remove_nodes(from_edge,to_edge, num_nodes, alpha))
-            #     # print("Final Qtable")
-            #     # print(qtables)
-            #     print("Path after removing:", fetch_path())
+        for i in edges:
+            graph_temp2 = copy.deepcopy(graph_temp)
+            qtables = copy.deepcopy(original_qtable)
+            from_edge = str(i['from'])
+            to_edge = str(i['to'])
+            # print("Path:",fetch_path())
+            # print("Removing edges:",from_edge,to_edge)
+            graph_temp2.remove_edge(int(from_edge), int(to_edge))
+            if not nx.has_path(graph_temp2, a_temp, b_temp):
+                continue
+            no_iterations.append(remove_nodes(from_edge,to_edge, num_nodes, alpha))
+            # print("Final Qtable")
+            # print(qtables)
+            # print("Path after removing:", fetch_path())
 
-            # print("No of iterations", no_iterations)
-            # print("Mean", np.mean(no_iterations))
-            # mean.append(np.mean(no_iterations))
+        # print("No of iterations", no_iterations)
+        # print("Mean", np.mean(no_iterations))
+        mean.append(np.mean(no_iterations))
     
-    # plt.title('Trend in iterations with number of nodes \n in graph for agent wise temp implementation (before removing node)')
-    # plt.ylabel('Number of iterations')
-    # plt.xlabel('Number of nodes in graph')
-    # plt.plot(q_ini, "-o")
-    # plt.savefig('../plots/q_n_graphs_agent.jpg')
-    # plt.show()
-    # plt.close()
-
-    plt.title('Trend in iterations with \n node level temperature')
+    # plotting the trends in number of iterations wrt number of nodes in graph 
+    plt.title('Trend in iterations with number of nodes \n in graph for agent wise temp implementation (before removing node)')
     plt.ylabel('Number of iterations')
-    plt.xlabel('Learning rate')
-    plt.plot(itr_lr, "-o")
-    plt.savefig('../plots/trends_agent_lr.jpg')
+    plt.xlabel('Number of nodes in graph')
+    plt.plot(nodes, q_ini, "-o")
+    plt.savefig('../plots/q_n_graphs_agent.jpg')
     plt.show()
     plt.close()
-    
-    # plt.title('Trend in iterations with node \n level temperature (after removing node)')
-    # plt.ylabel('Mean number of iterations')
-    # plt.xlabel('Number of nodes in graph')
-    # plt.plot(mean, "-o")
-    # plt.savefig('../plots/trends_agent2.jpg')
+
+    # plotting the trends in number of iterations wrt learning rate
+    # plt.title('Trend in iterations with \n node level temperature')
+    # plt.ylabel('Number of iterations')
+    # plt.xlabel('Learning rate')
+    # plt.plot(nodes, itr_lr, "-o")
+    # plt.savefig('../plots/trends_agent_lr.jpg')
     # plt.show()
     # plt.close()
+    
+    # plotting the trends in number of iterations wrt number of nodes in graph (after removing node)
+    plt.title('Trend in iterations with node \n level temperature (after removing node)')
+    plt.ylabel('Mean number of iterations')
+    plt.xlabel('Number of nodes in graph')
+    plt.plot(nodes, mean, "-o")
+    plt.savefig('../plots/trends_agent2.jpg')
+    plt.show()
+    plt.close()
     # print("Mean of graphs", mean)
     # print("Mean of mean of graphs", sum(mean)/len(mean))
 
     # pickle.dump(mean, open('../mean_agent1.p', 'wb'))
-    # print("graph3_15")
-    # initialize('1','9','graph3_15')
-    # cnt.append(qlearning())
-    # rem_cnt.append(remove_nodes('3','9'))
-    # # print("Final Qtable")
-    # # print(qtables)
-    # print()
-
-    # print("graph4_20")
-    # initialize('2','14','graph4_20')
-    # cnt.append(qlearning())
-    # # print("Final Qtable")
-    # # print(qtables)
-    # rem_cnt.append(remove_nodes('1','7'))
-    # #print("Final Qtable")
-    # #print(qtables)
-
-    # print(cnt)
-    # print(rem_cnt)
-    # plt.plot(no_nodes,cnt,'ro-')
-    # plt.plot(no_nodes,rem_cnt,'bo-')
-    # plt.show()
 
 if __name__ == "__main__":
     main()
